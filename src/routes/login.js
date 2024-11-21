@@ -1,27 +1,35 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
 var router = express.Router();
-const { generateToken } = require('../services/jwtGenerator');
+const { body, validationResult } = require('express-validator');
+const { authenticateUser } = require('../services/userService');
+require('dotenv').config();
 
 module.exports = function (getPool) {
 
-    router.post('/', async (req, res) => {
+    router.post('/', [
+        body('username').notEmpty().withMessage('Username is required'),
+        body('password').notEmpty().withMessage('Password is required')
+    ], async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).send({ message: errors.array() });
+        }
         console.log('Auth request received');
 
-        const users = [
-            { id: 1, username: 'user1', password: bcrypt.hashSync('password123', 4) } // Password is hashed
-        ];
-        const user = users.find(u => u.username === req.body.username);
-        if (!user) {
-            return res.status(400).send({ message: 'Invalid username or password' });
+        // Authenticate user
+        const DoesExist = await authenticateUser(req.body.username, req.body.password);
+
+        if (DoesExist){
+            // Generate JWT token
+            const accessToken = jwt.sign({ username: req.body.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            res.status(201).send({message: 'Login successful', token: accessToken});
+
+        } else {
+            res.status(401).send({ message: 'Invalid credentials' });
         }
-        if (!bcrypt.compareSync(req.body.password, user.password)) {
-            return res.status(400).send({ message: 'Invalid username or password' });
-        }
-            
-        // Generate JWT token
-        const token = generateToken(users[0]);
-        res.status(201).send({ message: 'Token created succesfully', token: token });
+
     });
 
     return router;
