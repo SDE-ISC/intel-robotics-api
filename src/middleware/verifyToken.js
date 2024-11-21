@@ -11,9 +11,6 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({ message: 'Missing token' });
     }
 
-    console.log('Verifying token:', token);
-    console.log('Using secret:', JWT_SECRET);
-
     jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
         if (err) {
             console.error('Error verifying token:', err);

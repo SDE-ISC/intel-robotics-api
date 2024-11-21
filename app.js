@@ -7,8 +7,6 @@ const cors = require('cors');
 require('dotenv').config();
 
 // Routers
-var indexRouter = require('./src/routes/index');
-var usersRouter = require('./src/routes/users');
 var productsRouter = require('./src/routes/products');
 var loginRouter = require('./src/routes/login.js');
 
@@ -40,8 +38,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/products', productsRouter(getPool)); // Existing product routes (you can add DB queries here too)
 app.use('/login', loginRouter(getPool)); // login route
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

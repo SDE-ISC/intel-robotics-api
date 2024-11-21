@@ -7,7 +7,6 @@ const { authenticateUser } = require('../services/userService');
 require('dotenv').config();
 
 module.exports = function (getPool) {
-
     router.post('/', [
         body('username').notEmpty().withMessage('Username is required'),
         body('password').notEmpty().withMessage('Password is required')
@@ -16,8 +15,6 @@ module.exports = function (getPool) {
         if (!errors.isEmpty()) {
             return res.status(400).send({ message: errors.array() });
         }
-        console.log('Auth request received');
-
         // Authenticate user
         const DoesExist = await authenticateUser(req.body.username, req.body.password);
 
@@ -29,7 +26,6 @@ module.exports = function (getPool) {
         } else {
             res.status(401).send({ message: 'Invalid credentials' });
         }
-
     });
 
     return router;
